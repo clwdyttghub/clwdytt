@@ -716,3 +716,49 @@ document.getElementById("modalEditToggleBtn").onclick = () => {
 // ==========================================
 setupNavigation();
 initDatabase();
+
+// ==========================================
+// DIRECT GOOGLE DRIVE UPLOAD BRIDGE
+// ==========================================
+document.getElementById("formFileInput").addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const statusText = document.getElementById("uploadStatusText");
+  const urlInput = document.getElementById("formContent");
+  
+  statusText.innerText = `Uploading ${file.name} to Google Drive...`;
+  statusText.style.color = "var(--accent-blue)";
+
+  const reader = new FileReader();
+  reader.readAsArrayBuffer(file);
+  reader.onload = async function(event) {
+    try {
+      const bytes = [...new Int8Array(event.target.result)];
+      const payload = {
+        filename: file.name,
+        mimeType: file.type,
+        bytes: btoa(String.fromCharCode.apply(null, bytes))
+      };
+
+      const response = await fetch("https://script.google.com/macros/s/AKfycbxss8ZtfaNyuy9wBB4EGoYhLnX27qzF-phfg9qEmh65sQeqYvwxYxIOOWwKG0AslPUFZw/exec", {
+        method: "POST",
+        body: JSON.stringify(payload)
+      });
+      
+      const result = await response.json();
+      if (result.status === "success") {
+        urlInput.value = result.url;
+        statusText.innerText = "Uploaded securely to Google Drive!";
+        statusText.style.color = "var(--accent-green)";
+      } else {
+        throw new Error(result.message);
+      }
+    } catch (err) {
+      console.error(err);
+      statusText.innerText = "Upload failed. Try entering a URL manually.";
+      statusText.style.color = "var(--accent-red)";
+    }
+  };
+  e.target.value = "";
+});
