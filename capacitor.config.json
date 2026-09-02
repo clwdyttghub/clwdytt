@@ -1,0 +1,6 @@
+{
+  "appId": "com.claudette.archive",
+  "appName": "Archive Workspace",
+  "webDir": "src-gyll",
+  "bundledWebRuntime": false
+}
