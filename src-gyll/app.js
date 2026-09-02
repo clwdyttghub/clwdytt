@@ -8,14 +8,13 @@ import { CATEGORIES, SEED_DATA } from "./data.js";
 // ==========================================
 // 1. FIREBASE INITIALIZATION
 // ==========================================
-const firebaseConfig = {
-    apiKey: "AIzaSyBICov_qzSRMbjoBLPTKciMfqfPwYVXyG4",
-    authDomain: "gyll-8ddd8.firebaseapp.com",
-    projectId: "gyll-8ddd8",
-    storageBucket: "gyll-8ddd8.firebasestorage.app",
-    messagingSenderId: "903334059791",
-    appId: "1:903334059791:web:dc4e9fc6e69be5c87ea87a",
-    measurementId: "G-2WXS8896G9"
+ const firebaseConfig = {
+    apiKey: "AIzaSyD83kT0yzWvWYdIFArrZ6jmBHxc6hBd4Xo",
+    authDomain: "clwdytt.firebaseapp.com",
+    projectId: "clwdytt",
+    storageBucket: "clwdytt.firebasestorage.app",
+    messagingSenderId: "655815508411",
+    appId: "1:655815508411:web:99cb3f8166a6c0bc88049e"
   };
 
 const app = initializeApp(firebaseConfig);
