@@ -69,7 +69,7 @@
 
   </main>
 
-  <!-- CONTENT VIEWER MODAL (Notes, Lists, Tables, PDFs, Images, Text Groups) -->
+  <!-- CONTENT VIEWER MODAL -->
   <div class="modal-backdrop" id="viewerModal">
     <div class="modal-sheet">
       <div class="modal-header">
@@ -112,11 +112,18 @@
           <button type="button" class="btn-secondary btn-sm" id="addExtraColBtn" style="margin-bottom: 16px;">+ Add Column</button>
         </div>
 
-        <!-- URL / FILE PATH CONFIGURATION -->
+        <!-- URL / FILE PATH CONFIGURATION WITH UPLOAD -->
         <div id="urlFieldContainer">
-          <label class="form-label">SOURCE URL OR LOCAL PATH</label>
-          <input type="text" class="form-input" id="formContent" placeholder="https://... or assets/filename.pdf" />
-          <p class="form-hint">Tip: For free storage, put your files in the <code>assets/</code> folder, or paste a MEGA link.</p>
+          <label class="form-label" id="contentLabel">SOURCE URL</label>
+          <div style="display: flex; gap: 10px; margin-bottom: 8px;">
+            <input type="text" class="form-input" id="formContent" placeholder="https://..." style="margin-bottom: 0; flex: 1;" />
+            
+            <label id="uploadButtonContainer" class="btn-secondary" style="display: none; align-items: center; cursor: pointer; white-space: nowrap; padding: 0 16px;">
+              Upload File
+              <input type="file" id="formFileInput" style="display: none;" />
+            </label>
+          </div>
+          <p class="form-hint" id="uploadStatusText">Tip: Paste a link directly or use the upload button.</p>
         </div>
 
         <button type="submit" class="btn-primary" style="margin-top: 20px;">Save Entity</button>
@@ -127,7 +134,6 @@
   <!-- TOAST FEEDBACK -->
   <div class="toast" id="toast">Copied to clipboard!</div>
 
-  <!-- FIREBASE SCRIPTS (MODULAR V10 VIA CDN) -->
   <script type="module" src="app.js"></script>
 </body>
 </html>

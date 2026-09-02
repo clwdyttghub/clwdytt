@@ -8,14 +8,14 @@ import { CATEGORIES, SEED_DATA } from "./data.js";
 // ==========================================
 // 1. FIREBASE INITIALIZATION
 // ==========================================
- const firebaseConfig = {
-    apiKey: "AIzaSyD83kT0yzWvWYdIFArrZ6jmBHxc6hBd4Xo",
-    authDomain: "clwdytt.firebaseapp.com",
-    projectId: "clwdytt",
-    storageBucket: "clwdytt.firebasestorage.app",
-    messagingSenderId: "655815508411",
-    appId: "1:655815508411:web:99cb3f8166a6c0bc88049e"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyD83kT0yzWvWYdIFArrZ6jmBHxc6hBd4Xo",
+  authDomain: "clwdytt.firebaseapp.com",
+  projectId: "clwdytt",
+  storageBucket: "clwdytt.firebasestorage.app",
+  messagingSenderId: "655815508411",
+  appId: "1:655815508411:web:99cb3f8166a6c0bc88049e"
+};
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -31,12 +31,10 @@ let isModalEditMode = false;
 let activeModalItem = null;
 let activeCardHighlightTimer = null;
 
-// Replace with your GitHub repository URL:
 const GITHUB_USER = "clwdyttghub";
 const GITHUB_REPO = "clwdytt";
 const APK_DOWNLOAD_URL = `https://github.com/${GITHUB_USER}/${GITHUB_REPO}/releases/latest/download/app-debug.apk`;
 
-// Update download links on page
 document.getElementById("apkDownloadBtn").href = APK_DOWNLOAD_URL;
 document.getElementById("heroApkBtn").href = APK_DOWNLOAD_URL;
 
@@ -55,7 +53,6 @@ async function initDatabase() {
     await batch.commit();
   }
 
-  // Real-time updates listener
   const q = query(itemsCol, orderBy("order_index", "asc"));
   onSnapshot(q, (snap) => {
     allItems = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -74,7 +71,6 @@ function setupNavigation() {
   mobileNav.innerHTML = "";
 
   CATEGORIES.forEach(cat => {
-    // Desktop link
     const dLink = document.createElement("a");
     dLink.className = "nav-link";
     dLink.innerText = cat.title;
@@ -82,7 +78,6 @@ function setupNavigation() {
     dLink.dataset.catId = cat.id;
     desktopNav.appendChild(dLink);
 
-    // Mobile link
     const mLink = document.createElement("div");
     mLink.className = "mobile-nav-item";
     mLink.innerText = cat.title;
@@ -124,7 +119,6 @@ window.navigateToWelcome = function() {
 function renderCategory(catId) {
   const grid = document.getElementById("cardsGrid");
   grid.innerHTML = "";
-
   const filtered = allItems.filter(i => i.category === catId);
 
   filtered.forEach((item, index) => {
@@ -154,7 +148,6 @@ function renderCategory(catId) {
       const controls = document.createElement("div");
       controls.className = "card-edit-controls";
 
-      // Move Up
       if (index > 0) {
         const upBtn = document.createElement("button");
         upBtn.className = "badge-btn move";
@@ -162,8 +155,6 @@ function renderCategory(catId) {
         upBtn.onclick = (e) => { e.stopPropagation(); moveEntity(index, -1); };
         controls.appendChild(upBtn);
       }
-
-      // Move Down
       if (index < filtered.length - 1) {
         const downBtn = document.createElement("button");
         downBtn.className = "badge-btn move";
@@ -172,14 +163,12 @@ function renderCategory(catId) {
         controls.appendChild(downBtn);
       }
 
-      // Edit
       const editBtn = document.createElement("button");
       editBtn.className = "badge-btn edit";
       editBtn.innerHTML = "✎";
       editBtn.onclick = (e) => { e.stopPropagation(); openEditEntityModal(item); };
       controls.appendChild(editBtn);
 
-      // Delete
       const delBtn = document.createElement("button");
       delBtn.className = "badge-btn del";
       delBtn.innerHTML = "✕";
@@ -188,7 +177,6 @@ function renderCategory(catId) {
 
       wrapper.appendChild(controls);
     }
-
     grid.appendChild(wrapper);
   });
 }
@@ -258,7 +246,6 @@ function renderViewerContent() {
     try { columns = JSON.parse(item.content) || ["Copy/paste"]; } catch(e) { columns = ["Copy/paste"]; }
     let listData = [...(item.group_data || [])];
 
-    // Natural numeric-aware sort on column 1
     listData.sort((a, b) => {
       const vA = (a.cells[0] || "").toString().replace(/\./g, '');
       const vB = (b.cells[0] || "").toString().replace(/\./g, '');
@@ -304,19 +291,16 @@ function renderViewerContent() {
     const table = document.createElement("table");
     table.className = "custom-table";
 
-    // Header
     let theadHtml = `<thead><tr><th style="width:40px;"></th>`;
     columns.forEach(col => { theadHtml += `<th>${escapeHtml(col)}</th>`; });
     if (isModalEditMode) theadHtml += `<th style="width:40px;"></th>`;
     theadHtml += `</tr></thead>`;
     table.innerHTML = theadHtml;
 
-    // Body
     const tbody = document.createElement("tbody");
     listData.forEach((row, rIdx) => {
       const tr = document.createElement("tr");
 
-      // Checkbox
       const tdCheck = document.createElement("td");
       const checkbox = document.createElement("input");
       checkbox.type = "checkbox";
@@ -329,7 +313,6 @@ function renderViewerContent() {
       tdCheck.appendChild(checkbox);
       tr.appendChild(tdCheck);
 
-      // Cells
       row.cells.forEach((cell, cIdx) => {
         const td = document.createElement("td");
         if (isModalEditMode) {
@@ -353,7 +336,6 @@ function renderViewerContent() {
         tr.appendChild(td);
       });
 
-      // Delete Row in edit mode
       if (isModalEditMode) {
         const tdDel = document.createElement("td");
         const delBtn = document.createElement("button");
@@ -370,7 +352,6 @@ function renderViewerContent() {
         tdDel.appendChild(delBtn);
         tr.appendChild(tdDel);
       }
-
       tbody.appendChild(tr);
     });
     table.appendChild(tbody);
@@ -477,9 +458,13 @@ function renderViewerContent() {
     });
 
     if (isModalEditMode) {
+      const btnRow = document.createElement("div");
+      btnRow.style.display = "flex";
+      btnRow.style.gap = "10px";
+
       const addImgBtn = document.createElement("button");
       addImgBtn.className = "btn-secondary";
-      addImgBtn.innerText = "+ Add Image Item";
+      addImgBtn.innerText = "+ Paste Image Link";
       addImgBtn.onclick = async () => {
         const label = prompt("Enter Image Label:");
         const url = prompt("Enter Image URL (e.g. assets/pic.jpg or web url):");
@@ -488,7 +473,18 @@ function renderViewerContent() {
           await saveInnerGroupData(updated);
         }
       };
-      container.appendChild(addImgBtn);
+
+      const uploadImgLabel = document.createElement("label");
+      uploadImgLabel.className = "btn-primary";
+      uploadImgLabel.style.cursor = "pointer";
+      uploadImgLabel.style.display = "flex";
+      uploadImgLabel.style.alignItems = "center";
+      uploadImgLabel.style.justifyContent = "center";
+      uploadImgLabel.innerHTML = `+ Upload Photo <input type="file" accept="image/*" style="display:none" onchange="window.uploadImageItem(this)" />`;
+
+      btnRow.appendChild(addImgBtn);
+      btnRow.appendChild(uploadImgLabel);
+      container.appendChild(btnRow);
     }
   }
 
@@ -570,28 +566,41 @@ function openEditEntityModal(item = null) {
   document.getElementById("formSubtitle").value = isEditing ? (item.subtitle || "") : "";
   document.getElementById("formContent").value = isEditing ? (item.content || "") : "";
 
-  setupTypeSelector(isEditing ? item.type : (activeCategory === "notepad-category" ? "note" : "link"));
+  setupTypeSelector(isEditing ? item.type : null);
   document.getElementById("formModal").classList.add("active");
 }
 
-function setupTypeSelector(selectedType) {
+function setupTypeSelector(existingType) {
   const container = document.getElementById("typeSelectorGroup");
   container.innerHTML = "";
 
-  const types = activeCategory === "notepad-category" 
-    ? [{ id: 'note', label: 'Note' }, { id: 'list', label: 'List' }]
-    : [
-        { id: 'link', label: 'Link' },
-        { id: 'text_group', label: 'Text Group' },
-        { id: 'image_group', label: 'Images' },
-        { id: 'pdf', label: 'Doc' }
-      ];
+  let allowedTypes = [];
 
-  types.forEach(t => {
+  // Strictly define available types based on the exact category selected
+  if (activeCategory === "notepad-category") {
+    allowedTypes = [{ id: 'note', label: 'Note' }, { id: 'list', label: 'List' }];
+  } else if (activeCategory === "pdf-category") {
+    allowedTypes = [{ id: 'pdf', label: 'Document (PDF)' }];
+  } else if (activeCategory === "text-category") {
+    allowedTypes = [{ id: 'text_group', label: 'Text Group' }];
+  } else if (activeCategory === "image-category") {
+    allowedTypes = [{ id: 'image_group', label: 'Photo Gallery' }];
+  } else if (activeCategory === "pc-automation") {
+    allowedTypes = [{ id: 'script', label: 'Script File' }];
+  } else {
+    allowedTypes = [{ id: 'link', label: 'Web Link' }];
+  }
+
+  let currentType = existingType && allowedTypes.find(t => t.id === existingType) 
+    ? existingType 
+    : allowedTypes[0].id;
+
+  allowedTypes.forEach(t => {
     const btn = document.createElement("button");
     btn.type = "button";
-    btn.className = `type-choice-btn ${t.id === selectedType ? 'selected' : ''}`;
+    btn.className = `type-choice-btn ${t.id === currentType ? 'selected' : ''}`;
     btn.innerText = t.label;
+    btn.dataset.type = t.id; // Store the ID on the button
     btn.onclick = () => {
       document.querySelectorAll(".type-choice-btn").forEach(b => b.classList.remove("selected"));
       btn.classList.add("selected");
@@ -600,14 +609,48 @@ function setupTypeSelector(selectedType) {
     container.appendChild(btn);
   });
 
-  updateFormVisibility(selectedType);
+  updateFormVisibility(currentType);
 }
 
 function updateFormVisibility(type) {
   const isList = type === "list";
+  const isTextGroup = type === "text_group";
+  const isImageGroup = type === "image_group";
+  const isFile = type === "pdf" || type === "script";
+  const isLink = type === "link";
   const isNote = type === "note";
+
   document.getElementById("listFieldsContainer").style.display = isList ? "block" : "none";
-  document.getElementById("urlFieldContainer").style.display = isNote ? "none" : "block";
+  
+  const urlContainer = document.getElementById("urlFieldContainer");
+  const contentLabel = document.getElementById("contentLabel");
+  const contentInput = document.getElementById("formContent");
+  const uploadBtn = document.getElementById("uploadButtonContainer");
+  const hintText = document.getElementById("uploadStatusText");
+
+  if (isTextGroup || isImageGroup || isList) {
+    // Hide main content for groups (they get added inside the Viewer)
+    urlContainer.style.display = "none";
+  } else {
+    urlContainer.style.display = "block";
+    
+    if (isFile) {
+      contentLabel.innerText = "FILE LINK OR DIRECT UPLOAD";
+      contentInput.placeholder = "https://... or assets/filename.pdf";
+      uploadBtn.style.display = "flex";
+      hintText.innerText = "Tip: Paste a cloud link (like MEGA), or click 'Upload File' to auto-upload to Google Drive.";
+    } else if (isLink) {
+      contentLabel.innerText = "WEBSITE URL";
+      contentInput.placeholder = "https://...";
+      uploadBtn.style.display = "none";
+      hintText.innerText = "Tip: Paste the direct web link here. It will open in a new browser tab.";
+    } else if (isNote) {
+      contentLabel.innerText = "NOTE TEXT";
+      contentInput.placeholder = "Write your note here...";
+      uploadBtn.style.display = "none";
+      hintText.innerText = "Tip: This is the main content of your note. You can edit it anytime.";
+    }
+  }
 }
 
 document.getElementById("openCreateModalBtn").onclick = () => openEditEntityModal();
@@ -618,8 +661,9 @@ document.getElementById("entityForm").onsubmit = async (e) => {
   const id = document.getElementById("formEntityId").value;
   const title = document.getElementById("formTitle").value;
   const subtitle = document.getElementById("formSubtitle").value;
+  
   const selectedTypeBtn = document.querySelector(".type-choice-btn.selected");
-  const type = selectedTypeBtn ? selectedTypeBtn.innerText.toLowerCase().replace(" ", "_") : "link";
+  const type = selectedTypeBtn ? selectedTypeBtn.dataset.type : "link";
   let content = document.getElementById("formContent").value;
 
   const payload = {
@@ -712,14 +756,10 @@ document.getElementById("modalEditToggleBtn").onclick = () => {
 };
 
 // ==========================================
-// 8. BOOTSTRAP
+// 8. DIRECT CLOUD UPLOAD CONTROLLERS
 // ==========================================
-setupNavigation();
-initDatabase();
 
-// ==========================================
-// DIRECT GOOGLE DRIVE UPLOAD BRIDGE
-// ==========================================
+// A. Upload for Documents / Scripts (Inside the Create Entity Modal)
 document.getElementById("formFileInput").addEventListener("change", async (e) => {
   const file = e.target.files[0];
   if (!file) return;
@@ -727,7 +767,7 @@ document.getElementById("formFileInput").addEventListener("change", async (e) =>
   const statusText = document.getElementById("uploadStatusText");
   const urlInput = document.getElementById("formContent");
   
-  statusText.innerText = `Uploading ${file.name} to Google Drive...`;
+  statusText.innerText = `Uploading ${file.name} to Google Drive... Please wait.`;
   statusText.style.color = "var(--accent-blue)";
 
   const reader = new FileReader();
@@ -762,3 +802,49 @@ document.getElementById("formFileInput").addEventListener("change", async (e) =>
   };
   e.target.value = "";
 });
+
+// B. Upload specifically for the Photo Gallery (Inside the Entity Viewer)
+window.uploadImageItem = async function(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const label = prompt("Enter a label for this photo:") || "Uploaded Photo";
+  
+  const originalHtml = input.parentElement.innerHTML;
+  input.parentElement.innerText = "Uploading to Drive... Please wait.";
+
+  const reader = new FileReader();
+  reader.readAsArrayBuffer(file);
+  reader.onload = async function(event) {
+    try {
+      const bytes = [...new Int8Array(event.target.result)];
+      const payload = {
+        filename: file.name,
+        mimeType: file.type,
+        bytes: btoa(String.fromCharCode.apply(null, bytes))
+      };
+      
+      const response = await fetch("https://script.google.com/macros/s/AKfycbxss8ZtfaNyuy9wBB4EGoYhLnX27qzF-phfg9qEmh65sQeqYvwxYxIOOWwKG0AslPUFZw/exec", {
+        method: "POST",
+        body: JSON.stringify(payload)
+      });
+      
+      const result = await response.json();
+      if (result.status === "success") {
+        const updated = [...(activeModalItem.group_data || []), { label, url: result.url }];
+        await saveInnerGroupData(updated);
+        showToast("Photo uploaded successfully!");
+      } else {
+        throw new Error(result.message);
+      }
+    } catch (err) {
+      alert("Upload failed. Please try again.");
+      renderViewerContent(); // reset UI
+    }
+  };
+};
+
+// ==========================================
+// 9. BOOTSTRAP
+// ==========================================
+setupNavigation();
+initDatabase();
