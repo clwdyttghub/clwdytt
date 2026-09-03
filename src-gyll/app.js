@@ -606,6 +606,26 @@ window.openEditEntityModal = function(itemId = null) {
   document.getElementById("formSubtitle").value = isEditing ? (item.subtitle || "") : "";
   document.getElementById("formContent").value = isEditing ? (item.content || "") : "";
 
+  const extraColsContainer = document.getElementById("extraColumnsList");
+  extraColsContainer.innerHTML = "";
+
+  // Populate list columns if editing a list
+  if (isEditing && item.type === "list") {
+    try {
+      const cols = JSON.parse(item.content);
+      if (cols && cols.length > 0) {
+        document.getElementById("formMainColumn").value = cols[0];
+        for (let i = 1; i < cols.length; i++) {
+          addExtraColInput(cols[i]);
+        }
+      }
+    } catch(e) {
+      document.getElementById("formMainColumn").value = "Copy/paste";
+    }
+  } else {
+    document.getElementById("formMainColumn").value = "Copy/paste";
+  }
+
   setupTypeSelector(isEditing ? item.type : null);
   document.getElementById("formModal").classList.remove("hidden");
   document.getElementById("formModal").classList.add("flex");
@@ -615,6 +635,30 @@ window.closeFormModal = () => {
   document.getElementById("formModal").classList.add("hidden");
   document.getElementById("formModal").classList.remove("flex");
 };
+
+function addExtraColInput(value = "") {
+  const container = document.getElementById("extraColumnsList");
+  const wrapper = document.createElement("div");
+  wrapper.className = "flex gap-2";
+  
+  const input = document.createElement("input");
+  input.type = "text";
+  input.className = "extra-col-input flex-1 bg-gray-50 p-3.5 rounded-xl text-[15px] outline-none focus:ring-2 ring-accent-blue";
+  input.placeholder = "New Column Name";
+  input.value = value;
+  
+  const delBtn = document.createElement("button");
+  delBtn.type = "button";
+  delBtn.className = "bg-gray-100 text-accent-red px-4 rounded-xl font-bold hover:bg-gray-200 transition";
+  delBtn.innerText = "✕";
+  delBtn.onclick = () => wrapper.remove();
+  
+  wrapper.appendChild(input);
+  wrapper.appendChild(delBtn);
+  container.appendChild(wrapper);
+}
+
+document.getElementById("addExtraColBtn").onclick = () => addExtraColInput("");
 
 function setupTypeSelector(existingType) {
   const container = document.getElementById("typeSelectorGroup");
