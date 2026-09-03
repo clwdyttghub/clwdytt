@@ -214,7 +214,6 @@ async function handleDragReorder(fromIndex, toIndex, currentList) {
 window.copyAndHighlight = async (text, btnId, cardId, listRowIdx = null) => {
   navigator.clipboard.writeText(text).then(async () => {
     
-    // 1. Change the button color/text inside the modal
     if (btnId) {
       const btn = document.getElementById(btnId);
       if (btn) {
@@ -233,7 +232,6 @@ window.copyAndHighlight = async (text, btnId, cardId, listRowIdx = null) => {
       }
     }
 
-    // 2. Highlight the Card on the main screen
     if (cardId) {
       if (activeCardTimer) clearTimeout(activeCardTimer);
       if (activeCardId) {
@@ -252,7 +250,6 @@ window.copyAndHighlight = async (text, btnId, cardId, listRowIdx = null) => {
       }, 10000);
     }
 
-    // 3. Auto-Check Box if it's a List Item
     if (listRowIdx !== null && activeModalItem && activeModalItem.type === 'list') {
       activeModalItem.group_data[listRowIdx].checked = true;
       await updateDoc(doc(db, "items", activeModalItem.id), { group_data: activeModalItem.group_data });
@@ -383,14 +380,17 @@ function renderViewerContent() {
       tdCheck.appendChild(checkbox);
       tr.appendChild(tdCheck);
 
-      row.cells.forEach((cell, cIdx) => {
+      // FIX: Render based on columns so adding new columns dynamically works safely
+      columns.forEach((colName, cIdx) => {
+        const cellValue = row.cells[cIdx] || "";
         const td = document.createElement("td");
         td.className = "p-2 border-b border-gray-100 text-sm break-words whitespace-normal";
         if (isModalEditMode) {
           const inp = document.createElement("input");
           inp.className = "w-full bg-gray-50 p-2 rounded outline-none focus:ring-2 ring-accent-blue";
-          inp.value = cell;
+          inp.value = cellValue;
           inp.onchange = async (e) => {
+            while (listData[rIdx].cells.length <= cIdx) listData[rIdx].cells.push("");
             listData[rIdx].cells[cIdx] = e.target.value;
             await saveInnerGroupData(listData);
           };
@@ -399,8 +399,8 @@ function renderViewerContent() {
           const span = document.createElement("span");
           span.id = `list-copy-${rIdx}-${cIdx}`;
           span.className = "cursor-pointer bg-gray-50 text-gray-900 px-2 py-1 rounded hover:bg-blue-50 transition block w-full";
-          span.innerText = cell || "—";
-          span.onclick = () => window.copyAndHighlight(cell, span.id, item.id, rIdx);
+          span.innerText = cellValue || "—";
+          span.onclick = () => window.copyAndHighlight(cellValue, span.id, item.id, rIdx);
           td.appendChild(span);
         }
         tr.appendChild(td);
@@ -453,7 +453,6 @@ function renderViewerContent() {
           <button class="text-accent-red text-xl font-bold p-2" onclick="window.deleteGroupEntry(${idx})">✕</button>
         `;
       } else {
-        // Mobile-friendly stacking
         row.className = "flex flex-col md:flex-row md:items-center justify-between py-3 border-b border-gray-100 gap-2";
         row.innerHTML = `
           <div class="flex flex-col w-full break-words pr-2">
@@ -604,12 +603,17 @@ window.openEditEntityModal = function(itemId = null) {
   document.getElementById("formEntityId").value = isEditing ? item.id : "";
   document.getElementById("formTitle").value = isEditing ? item.title : "";
   document.getElementById("formSubtitle").value = isEditing ? (item.subtitle || "") : "";
-  document.getElementById("formContent").value = isEditing ? (item.content || "") : "";
+  
+  // Only set the content field if the item type uses it directly
+  if (isEditing && item.type !== "list") {
+      document.getElementById("formContent").value = item.content || "";
+  } else {
+      document.getElementById("formContent").value = "";
+  }
 
   const extraColsContainer = document.getElementById("extraColumnsList");
   extraColsContainer.innerHTML = "";
 
-  // Populate list columns if editing a list
   if (isEditing && item.type === "list") {
     try {
       const cols = JSON.parse(item.content);
@@ -666,7 +670,6 @@ function setupTypeSelector(existingType) {
 
   let allowedTypes = [];
 
-  // Strictly bind exact types per category to avoid clutter
   if (activeCategory === "notepad-category") {
     allowedTypes = [{ id: 'note', label: 'Note' }, { id: 'list', label: 'List' }];
   } else if (activeCategory === "pdf-category") {
@@ -758,39 +761,43 @@ document.getElementById("entityForm").onsubmit = async (e) => {
   const type = selectedTypeBtn ? selectedTypeBtn.dataset.type : "link";
   let content = document.getElementById("formContent").value;
 
+  // FIX: Ensure no undefined fields are passed to Firestore to prevent silent failures
   const payload = {
     category: activeCategory,
     title,
     subtitle,
-    type,
-    content,
-    order_index: id ? undefined : allItems.length
+    type
   };
 
   if (type === "list") {
     const mainCol = document.getElementById("formMainColumn").value || "Copy/paste";
     const extraCols = Array.from(document.querySelectorAll(".extra-col-input")).map(i => i.value).filter(v => v.trim());
     payload.content = JSON.stringify([mainCol, ...extraCols]);
-  }
-
-  if (id) {
-    await updateDoc(doc(db, "items", id), payload);
-    showToast("Entity updated");
   } else {
-    payload.group_data = (type === "list" || type.includes("group")) ? [] : null;
-    payload.created_at = new Date().toISOString();
-    await setDoc(doc(itemsCol), payload);
-    showToast("Entity created");
+    payload.content = content;
   }
 
-  window.closeFormModal();
+  try {
+    if (id) {
+      await updateDoc(doc(db, "items", id), payload);
+      showToast("Entity updated");
+    } else {
+      payload.order_index = allItems.length;
+      payload.group_data = (type === "list" || type.includes("group")) ? [] : null;
+      payload.created_at = new Date().toISOString();
+      await setDoc(doc(itemsCol), payload);
+      showToast("Entity created");
+    }
+    window.closeFormModal();
+  } catch (error) {
+    console.error("Error saving entity:", error);
+    alert("Error saving: " + error.message);
+  }
 };
 
 // ==========================================
 // 8. GLOBAL UTILITIES (Download, Toast, Drawers)
 // ==========================================
-
-// Add the missing Edit Button event listener here:
 document.getElementById("modalEditToggleBtn").onclick = () => {
   isModalEditMode = !isModalEditMode;
   document.getElementById("modalEditToggleBtn").innerText = isModalEditMode ? "Done" : "Edit";
@@ -798,7 +805,6 @@ document.getElementById("modalEditToggleBtn").onclick = () => {
 };
 
 function triggerFileDownload(url, filename) {
-  // Mobile Safe Open/Download mechanism
   window.open(url, '_blank');
   showToast("Opening " + filename);
 }
