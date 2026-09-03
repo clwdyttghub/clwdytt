@@ -4,135 +4,153 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Archive Workspace</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            accent: { blue: '#0071e3', hover: '#0077ed', green: '#34c759', red: '#ff3b30' },
+            gray: { 50: '#fbfbfd', 100: '#f5f5f7', 200: '#e8e8ed', 500: '#86868b', 900: '#1d1d1f' }
+          }
+        }
+      }
+    }
+  </script>
   <link rel="stylesheet" href="style.css" />
 </head>
-<body>
+<body class="bg-gray-50 text-gray-900 font-sans min-h-screen flex flex-col no-scrollbar">
 
   <!-- TOP GLOBAL NAVBAR -->
-  <header class="global-nav">
-    <div class="nav-container">
-      <div class="nav-brand" onclick="navigateToWelcome()">ARCHIVE</div>
+  <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200 h-14 flex items-center">
+    <div class="max-w-5xl mx-auto w-full px-5 flex justify-between items-center">
+      <div class="font-bold text-[15px] tracking-tight cursor-pointer" onclick="navigateToWelcome()">ARCHIVE</div>
       
       <!-- DESKTOP CATEGORY BAR -->
-      <nav class="desktop-links" id="desktopNavLinks"></nav>
+      <nav class="hidden md:flex gap-5 overflow-x-auto no-scrollbar" id="desktopNavLinks"></nav>
 
       <!-- TOP ACTIONS -->
-      <div class="nav-right">
-        <a id="apkDownloadBtn" href="#" class="apk-download-btn" title="Download Android APK">
+      <div class="flex items-center gap-3">
+        <a id="apkDownloadBtn" href="#" class="flex items-center gap-1.5 bg-gray-900 text-white px-3.5 py-1.5 rounded-full text-xs font-semibold hover:bg-gray-800 transition">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M5 20h14v-2H5v2zM12 2L6.5 7.5l1.42 1.41L11 5.83V16h2V5.83l3.08 3.09L17.5 7.5 12 2z"/></svg>
           <span>APK</span>
         </a>
-        <button class="hamburger-btn" id="mobileMenuBtn" aria-label="Open Menu">☰</button>
+        <button class="md:hidden text-2xl text-gray-900" id="mobileMenuBtn">☰</button>
       </div>
     </div>
   </header>
 
   <!-- MOBILE MENU MODAL -->
-  <div class="mobile-drawer" id="mobileDrawer">
-    <div class="mobile-drawer-header">
-      <span class="drawer-title">CATEGORIES</span>
-      <button class="drawer-close" id="closeDrawerBtn">&times;</button>
+  <div class="fixed top-0 right-0 w-4/5 max-w-[320px] h-screen bg-white z-[200] shadow-2xl transition-transform duration-300 translate-x-full flex flex-col p-6" id="mobileDrawer">
+    <div class="flex justify-between items-center pb-4 border-b border-gray-200 mb-4">
+      <span class="text-[13px] font-bold text-gray-500 tracking-wider">CATEGORIES</span>
+      <button class="text-2xl text-gray-500" onclick="closeMobileDrawer()">&times;</button>
     </div>
-    <div class="mobile-nav-list" id="mobileNavLinks"></div>
+    <div class="flex flex-col gap-2 overflow-y-auto no-scrollbar" id="mobileNavLinks"></div>
   </div>
 
   <!-- MAIN VIEW CONTAINER -->
-  <main class="main-container" id="mainContainer">
+  <main class="max-w-5xl mx-auto w-full px-5 py-10 flex-1" id="mainContainer">
     
     <!-- WELCOME / HERO VIEW -->
-    <section class="hero-view" id="welcomeView">
-      <h1 class="hero-title">Welcome to the Archive.</h1>
-      <p class="hero-subtitle">Organize your tools, track your objectives, and flawlessly facilitate your personal workflow.</p>
-      <div class="hero-actions">
-        <button class="hero-start-btn" onclick="selectCategory('notepad-category')">Open Workspace</button>
-        <a id="heroApkBtn" href="#" class="hero-apk-btn">Download Android App (.apk)</a>
+    <section class="min-h-[60vh] flex flex-col justify-center items-center text-center py-10" id="welcomeView">
+      <h1 class="text-4xl md:text-5xl font-bold tracking-tight mb-4">Welcome to the Archive.</h1>
+      <p class="text-lg md:text-xl text-gray-500 max-w-2xl mb-9">Organize your tools, track your objectives, and flawlessly facilitate your personal workflow.</p>
+      <div class="flex flex-wrap gap-4 justify-center">
+        <button class="bg-accent-blue text-white px-7 py-3.5 rounded-full text-base font-semibold hover:bg-accent-hover transition" onclick="selectCategory('notepad-category')">Open Workspace</button>
+        <a id="heroApkBtn" href="#" class="bg-gray-100 text-gray-900 px-6 py-3.5 rounded-full text-base font-semibold hover:bg-gray-200 transition">Download Android App</a>
       </div>
     </section>
 
     <!-- ACTIVE CATEGORY VIEW -->
-    <section class="category-view" id="categoryView" style="display: none;">
-      <div class="header-section">
+    <section id="categoryView" style="display: none;">
+      <div class="flex flex-col md:flex-row justify-between md:items-end mb-8 gap-4">
         <div>
-          <h2 class="page-title" id="activeCategoryTitle">Notepad</h2>
-          <p class="page-desc" id="activeCategoryDesc">Notes & Checklists</p>
+          <h2 class="text-4xl font-bold tracking-tight" id="activeCategoryTitle">Notepad</h2>
+          <p class="text-[13px] font-bold text-gray-500 uppercase tracking-widest mt-1" id="activeCategoryDesc">Notes & Checklists</p>
         </div>
-        <div class="header-action-group" id="headerActionGroup">
-          <button class="edit-global-btn" id="toggleGlobalEditBtn">Edit Category</button>
-          <button class="add-btn" id="openCreateModalBtn" style="display: none;">+ Add Entity</button>
-          <button class="done-btn" id="doneGlobalEditBtn" style="display: none;">Done</button>
+        <div class="flex gap-2">
+          <button class="bg-gray-100 text-gray-900 px-4 py-2 rounded-full text-[13px] font-semibold" id="toggleGlobalEditBtn">Edit Category</button>
+          <button class="bg-accent-blue text-white px-4 py-2 rounded-full text-[13px] font-semibold hidden" id="openCreateModalBtn">+ Add Entity</button>
+          <button class="bg-gray-300 text-gray-900 px-4 py-2 rounded-full text-[13px] font-semibold hidden" id="doneGlobalEditBtn">Done</button>
         </div>
       </div>
 
       <!-- CARDS GRID -->
-      <div class="cards-grid" id="cardsGrid"></div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="cardsGrid"></div>
     </section>
 
   </main>
 
   <!-- CONTENT VIEWER MODAL -->
-  <div class="modal-backdrop" id="viewerModal">
-    <div class="modal-sheet">
-      <div class="modal-header">
-        <h3 class="modal-title" id="viewerTitle">Entity Detail</h3>
-        <div class="modal-header-actions">
-          <button class="btn-secondary" id="modalEditToggleBtn">Edit</button>
-          <button class="btn-close" id="closeViewerBtn">Close</button>
+  <div class="fixed inset-0 bg-black/40 backdrop-blur-md z-[1000] hidden items-center justify-center p-4" id="viewerModal">
+    <div class="bg-white rounded-3xl w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden shadow-2xl">
+      <div class="p-5 border-b border-gray-200 flex justify-between items-center">
+        <h3 class="text-lg font-semibold truncate pr-4" id="viewerTitle">Entity Detail</h3>
+        <div class="flex gap-2 shrink-0">
+          <button class="bg-gray-100 text-accent-blue px-4 py-2 rounded-xl text-[13px] font-semibold" id="modalEditToggleBtn">Edit</button>
+          <button class="bg-gray-100 text-gray-900 px-4 py-2 rounded-xl text-[13px] font-semibold" onclick="closeViewerModal()">Close</button>
         </div>
       </div>
-      <div class="modal-body" id="viewerBody"></div>
+      <div class="p-6 overflow-y-auto no-scrollbar flex-1" id="viewerBody"></div>
     </div>
   </div>
 
   <!-- CREATE / EDIT ENTITY MODAL -->
-  <div class="modal-backdrop" id="formModal">
-    <div class="modal-sheet modal-sheet-sm">
-      <div class="modal-header">
-        <h3 class="modal-title" id="formModalTitle">Create New Entity</h3>
-        <button class="btn-close" id="closeFormBtn">&times;</button>
+  <div class="fixed inset-0 bg-black/40 backdrop-blur-md z-[1000] hidden items-center justify-center p-4" id="formModal">
+    <div class="bg-white rounded-3xl w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden shadow-2xl">
+      <div class="p-5 border-b border-gray-200 flex justify-between items-center">
+        <h3 class="text-lg font-semibold" id="formModalTitle">Create New Entity</h3>
+        <button class="text-2xl text-gray-500" onclick="closeFormModal()">&times;</button>
       </div>
-      <form class="modal-body modal-form" id="entityForm">
+      <form class="p-6 overflow-y-auto no-scrollbar flex-1 flex flex-col gap-4" id="entityForm">
         <input type="hidden" id="formEntityId" />
         
-        <label class="form-label">TITLE</label>
-        <input type="text" class="form-input" id="formTitle" placeholder="e.g., Project Tasks" required />
-
-        <label class="form-label">SUBTITLE / DESCRIPTION</label>
-        <input type="text" class="form-input" id="formSubtitle" placeholder="e.g., To-Do and Status" />
-
-        <label class="form-label">ENTITY TYPE</label>
-        <div class="type-selector-group" id="typeSelectorGroup"></div>
-
-        <!-- LIST COLUMN CONFIGURATION -->
-        <div id="listFieldsContainer" style="display: none;">
-          <label class="form-label">MAIN COLUMN</label>
-          <input type="text" class="form-input" id="formMainColumn" placeholder="e.g., Copy/paste" value="Copy/paste" />
-          
-          <label class="form-label">EXTRA COLUMNS</label>
-          <div id="extraColumnsList"></div>
-          <button type="button" class="btn-secondary btn-sm" id="addExtraColBtn" style="margin-bottom: 16px;">+ Add Column</button>
+        <div>
+          <label class="block text-[11px] font-bold text-gray-500 tracking-wider uppercase mb-1.5">TITLE</label>
+          <input type="text" class="w-full bg-gray-100 p-3.5 rounded-xl text-[15px] outline-none focus:ring-2 ring-accent-blue" id="formTitle" placeholder="e.g., Project Tasks" required />
         </div>
 
-        <!-- URL / FILE PATH CONFIGURATION WITH UPLOAD -->
+        <div>
+          <label class="block text-[11px] font-bold text-gray-500 tracking-wider uppercase mb-1.5">SUBTITLE / DESCRIPTION</label>
+          <input type="text" class="w-full bg-gray-100 p-3.5 rounded-xl text-[15px] outline-none focus:ring-2 ring-accent-blue" id="formSubtitle" placeholder="e.g., To-Do and Status" />
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold text-gray-500 tracking-wider uppercase mb-1.5">ENTITY TYPE</label>
+          <div class="flex flex-wrap gap-2" id="typeSelectorGroup"></div>
+        </div>
+
+        <div id="listFieldsContainer" class="hidden">
+          <label class="block text-[11px] font-bold text-gray-500 tracking-wider uppercase mb-1.5">MAIN COLUMN</label>
+          <input type="text" class="w-full bg-gray-100 p-3.5 rounded-xl text-[15px] outline-none focus:ring-2 ring-accent-blue mb-4" id="formMainColumn" placeholder="e.g., Copy/paste" value="Copy/paste" />
+          
+          <label class="block text-[11px] font-bold text-gray-500 tracking-wider uppercase mb-1.5">EXTRA COLUMNS</label>
+          <div id="extraColumnsList" class="flex flex-col gap-2 mb-3"></div>
+          <button type="button" class="bg-gray-100 text-accent-blue px-3 py-1.5 rounded-lg text-xs font-bold" id="addExtraColBtn">+ Add Column</button>
+        </div>
+
         <div id="urlFieldContainer">
-          <label class="form-label" id="contentLabel">SOURCE URL</label>
-          <div style="display: flex; gap: 10px; margin-bottom: 8px;">
-            <input type="text" class="form-input" id="formContent" placeholder="https://..." style="margin-bottom: 0; flex: 1;" />
-            
-            <label id="uploadButtonContainer" class="btn-secondary" style="display: none; align-items: center; cursor: pointer; white-space: nowrap; padding: 0 16px;">
+          <label class="block text-[11px] font-bold text-gray-500 tracking-wider uppercase mb-1.5" id="contentLabel">SOURCE URL</label>
+          <div class="flex gap-2 mb-2">
+            <input type="text" class="flex-1 bg-gray-100 p-3.5 rounded-xl text-[15px] outline-none focus:ring-2 ring-accent-blue" id="formContent" placeholder="https://..." />
+            <label id="uploadButtonContainer" class="hidden items-center justify-center bg-gray-100 text-accent-blue px-4 rounded-xl text-[13px] font-semibold cursor-pointer whitespace-nowrap hover:bg-gray-200">
               Upload File
-              <input type="file" id="formFileInput" style="display: none;" />
+              <input type="file" id="formFileInput" class="hidden" />
             </label>
           </div>
-          <p class="form-hint" id="uploadStatusText">Tip: Paste a link directly or use the upload button.</p>
+          <p class="text-xs text-gray-500" id="uploadStatusText">Tip: Paste a link directly or use the upload button.</p>
         </div>
 
-        <button type="submit" class="btn-primary" style="margin-top: 20px;">Save Entity</button>
+        <button type="submit" class="w-full bg-accent-blue text-white p-3.5 rounded-xl text-[15px] font-semibold mt-2 hover:bg-accent-hover transition">Save Entity</button>
       </form>
     </div>
   </div>
 
   <!-- TOAST FEEDBACK -->
-  <div class="toast" id="toast">Copied to clipboard!</div>
+  <div class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-gray-900/95 text-white px-6 py-3 rounded-full text-sm font-semibold shadow-xl z-[2000] transition-transform duration-300 translate-y-[100px]" id="toast">Copied to clipboard!</div>
 
   <script type="module" src="app.js"></script>
 </body>
