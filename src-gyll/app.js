@@ -745,6 +745,14 @@ document.getElementById("entityForm").onsubmit = async (e) => {
 // ==========================================
 // 8. GLOBAL UTILITIES (Download, Toast, Drawers)
 // ==========================================
+
+// Add the missing Edit Button event listener here:
+document.getElementById("modalEditToggleBtn").onclick = () => {
+  isModalEditMode = !isModalEditMode;
+  document.getElementById("modalEditToggleBtn").innerText = isModalEditMode ? "Done" : "Edit";
+  renderViewerContent();
+};
+
 function triggerFileDownload(url, filename) {
   // Mobile Safe Open/Download mechanism
   window.open(url, '_blank');
